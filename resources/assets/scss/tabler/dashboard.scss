@@ -1,0 +1,118 @@
+
+@import "~bootstrap/scss/_functions.scss";
+
+@import "_variables.scss";
+
+@import "../../vendors/tabler/src/scss/_utilities.scss";
+@import "../../vendors/tabler/src/scss/_mixins.scss";
+
+@import "~bootstrap/scss/_functions.scss";
+@import "~bootstrap/scss/_variables.scss";
+@import "~bootstrap/scss/_mixins.scss";
+@import "~bootstrap/scss/_utilities.scss";
+
+@import "_variables.scss";
+
+@import "../../vendors/tabler/src/scss/_mixins-override.scss";
+
+@import "~bootstrap/scss/_root.scss";
+@import "~bootstrap/scss/_reboot.scss";
+@import "~bootstrap/scss/_type.scss";
+@import "~bootstrap/scss/_images.scss";
+@import "~bootstrap/scss/_containers.scss";
+@import "~bootstrap/scss/_grid.scss";
+@import "~bootstrap/scss/_tables.scss";
+@import "~bootstrap/scss/_forms.scss";
+@import "~bootstrap/scss/_buttons.scss";
+@import "~bootstrap/scss/_transitions.scss";
+@import "~bootstrap/scss/_dropdown.scss";
+@import "~bootstrap/scss/_button-group.scss";
+@import "~bootstrap/scss/_nav.scss";
+@import "~bootstrap/scss/_navbar.scss";
+@import "~bootstrap/scss/_card.scss";
+@import "~bootstrap/scss/_breadcrumb.scss";
+@import "~bootstrap/scss/_pagination.scss";
+@import "~bootstrap/scss/_badge.scss";
+@import "~bootstrap/scss/_alert.scss";
+@import "~bootstrap/scss/_progress.scss";
+@import "~bootstrap/scss/_list-group.scss";
+@import "~bootstrap/scss/_close.scss";
+@import "~bootstrap/scss/_toasts.scss";
+@import "~bootstrap/scss/_modal.scss";
+@import "~bootstrap/scss/_tooltip.scss";
+@import "~bootstrap/scss/_popover.scss";
+@import "~bootstrap/scss/_carousel.scss";
+@import "~bootstrap/scss/_spinners.scss";
+
+// Helpers
+@import "~bootstrap/scss/_helpers.scss";
+
+// Utilities
+@import "~bootstrap/scss/utilities/_api.scss";
+
+
+
+
+@import "../../vendors/tabler/src/scss/fonts/_webfonts.scss";
+
+@import "../../vendors/tabler/src/scss/layout/_core.scss";
+@import "../../vendors/tabler/src/scss/layout/_navbar.scss";
+@import "../../vendors/tabler/src/scss/layout/_page.scss";
+@import "../../vendors/tabler/src/scss/layout/_footer.scss";
+
+@import "../../vendors/tabler/src/scss/ui/_alerts.scss";
+@import "../../vendors/tabler/src/scss/ui/_avatars.scss";
+@import "../../vendors/tabler/src/scss/ui/_badges.scss";
+@import "../../vendors/tabler/src/scss/ui/_breadcrumbs.scss";
+@import "../../vendors/tabler/src/scss/ui/_buttons.scss";
+@import "../../vendors/tabler/src/scss/ui/_calendars.scss";
+@import "../../vendors/tabler/src/scss/ui/_cards.scss";
+@import "../../vendors/tabler/src/scss/ui/_close.scss";
+@import "../../vendors/tabler/src/scss/ui/_dropdowns.scss";
+@import "../../vendors/tabler/src/scss/ui/_empty.scss";
+@import "../../vendors/tabler/src/scss/ui/_grid.scss";
+@import "../../vendors/tabler/src/scss/ui/_icons.scss";
+@import "../../vendors/tabler/src/scss/ui/_images.scss";
+@import "../../vendors/tabler/src/scss/ui/_forms.scss";
+@import "../../vendors/tabler/src/scss/ui/forms/_form-icon.scss";
+@import "../../vendors/tabler/src/scss/ui/forms/_form-colorinput.scss";
+@import "../../vendors/tabler/src/scss/ui/forms/_form-imagecheck.scss";
+@import "../../vendors/tabler/src/scss/ui/forms/_form-selectgroup.scss";
+@import "../../vendors/tabler/src/scss/ui/forms/_form-custom.scss";
+@import "../../vendors/tabler/src/scss/ui/forms/_form-check.scss";
+@import "../../vendors/tabler/src/scss/ui/forms/_validation.scss";
+@import "../../vendors/tabler/src/scss/ui/_legend.scss";
+@import "../../vendors/tabler/src/scss/ui/_lists.scss";
+@import "../../vendors/tabler/src/scss/ui/_loaders.scss";
+@import "../../vendors/tabler/src/scss/ui/_login.scss";
+@import "../../vendors/tabler/src/scss/ui/_modals.scss";
+@import "../../vendors/tabler/src/scss/ui/_nav.scss";
+@import "../../vendors/tabler/src/scss/ui/_stars.scss";
+@import "../../vendors/tabler/src/scss/ui/_pagination.scss";
+@import "../../vendors/tabler/src/scss/ui/_popovers.scss";
+@import "../../vendors/tabler/src/scss/ui/_progress.scss";
+@import "../../vendors/tabler/src/scss/ui/_ribbons.scss";
+@import "../../vendors/tabler/src/scss/ui/_markdown.scss";
+@import "../../vendors/tabler/src/scss/ui/_skeleton.scss";
+@import "../../vendors/tabler/src/scss/ui/_steps.scss";
+@import "../../vendors/tabler/src/scss/ui/_switch-icon.scss";
+@import "../../vendors/tabler/src/scss/ui/_tables.scss";
+@import "../../vendors/tabler/src/scss/ui/_toasts.scss";
+
+@import "../../vendors/tabler/src/scss/ui/_toolbar.scss";
+@import "../../vendors/tabler/src/scss/ui/_type.scss";
+@import "../../vendors/tabler/src/scss/ui/_charts.scss";
+
+@import "../../vendors/tabler/src/scss/utils/_background.scss";
+@import "../../vendors/tabler/src/scss/utils/_colors.scss";
+@import "../../vendors/tabler/src/scss/utils/_scroll.scss";
+@import "../../vendors/tabler/src/scss/utils/_sizing.scss";
+@import "../../vendors/tabler/src/scss/utils/_opacity.scss";
+@import "../../vendors/tabler/src/scss/utils/_shadow.scss";
+@import "../../vendors/tabler/src/scss/utils/_text.scss";
+
+@import "../../vendors/tabler/src/scss/_dark.scss";
+@import "../../vendors/tabler/src/scss/_debug.scss";
+
+
+@import "_overload.scss";

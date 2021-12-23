@@ -1,0 +1,79 @@
+
+.avatar {
+	background-color: $dark;
+}
+
+.bg-theme {
+	background-color: $body-bg;
+}
+
+
+.toast{
+	background-color: $light;
+	color: inherit;
+}
+
+.toast-header {
+	background-color: rgba($dark, .04);
+	color: inherit;
+}
+
+.toast-body {
+	overflow: hidden;
+}
+
+
+.btn .enabled {
+	display: block;
+}
+.btn .disabled {
+	display: none;
+}
+
+.btn:disabled .enabled {
+	display:none;
+}
+
+.btn:disabled .disabled {
+	display:block;
+	pointer-events: none;
+}
+
+/*Datatable ellipsis button*/
+span.ellipsis.btn-group {
+    padding: 4px 8px;
+}
+
+
+@include dark-mode {
+
+	$link-color: $blue !important;
+
+	.toast{
+		background-color: $dark;
+		color: inherit;
+	}
+
+	.toast-header {
+		background-color: rgba($light, .04);
+		color: inherit;
+	}
+
+	.bg-theme {
+		background-color: $dark-mode-darken;
+	}
+
+	.form-check-input:not(:checked),
+	.form-select,
+	.form-file-text,
+	.form-control,
+	.form-selectgroup-label,
+	.flatpickr-input.flatpickr-input,
+	.form-selectgroup-check,
+	.form-imagecheck-figure:before {
+		background-color: $dark;
+		color: $dark-mode-text;
+	}
+
+
+}

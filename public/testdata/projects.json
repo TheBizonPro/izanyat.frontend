@@ -1,0 +1,56 @@
+{
+	"draw":3,
+	"recordsTotal":11,
+	"recordsFiltered":11,
+	"data":[
+		{
+			"id":1,
+			"name":"ООО «Пятерочка»",
+			"selfemployeds_count":451,
+			"payouts_sum":"2 259 150 ₽",
+			"created_date":"11 мая 2021"
+		},
+		{
+			"id":2,
+			"name":"ООО «Перекресток»",
+			"selfemployeds_count":124,
+			"payouts_sum":"5 159 835 ₽",
+			"created_date":"19 марта 2021"
+		},
+		{
+			"id":3,
+			"name":"ООО «Азбука вкуса»",
+			"selfemployeds_count":952,
+			"payouts_sum":"4 525 019 ₽",
+			"created_date":"14 мая 2020"
+		},
+		{
+			"id":4,
+			"name":"ООО «Макдональдс»",
+			"selfemployeds_count":104,
+			"payouts_sum":"7 100 199 ₽",
+			"created_date":"11 мая 2018"
+		},
+		{
+			"id":5,
+			"name":"ООО «Бургер кинг»",
+			"selfemployeds_count":155,
+			"payouts_sum":"1 800 150 ₽",
+			"created_date":"5 мая 2018"
+		},
+		{
+			"id":6,
+			"name":"ООО «Клининг сервис»",
+			"selfemployeds_count":487,
+			"payouts_sum":"199 150 ₽",
+			"created_date":"11 января 2020"
+		},
+		{
+			"id":7,
+			"name":"ООО «Метро»",
+			"selfemployeds_count":585,
+			"payouts_sum":"6 582 152 ₽",
+			"created_date":"5 июня 2018"
+		}
+	]
+}

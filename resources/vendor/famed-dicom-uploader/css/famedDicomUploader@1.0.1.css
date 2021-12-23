@@ -1,0 +1,107 @@
+#dicom-uploader .btn {
+    box-shadow: none !important;
+}
+
+#dicom-input-files .btn,
+#dicom-output-files .btn,
+.dicom-upload-file-button {
+    cursor: pointer;
+}
+
+.dicom-upload-file-button-secondary[disabled] {
+    display: none;
+}
+
+.dicom-study > header > h6 > span:before,
+.dicom-ser > header > h6 > span:before {
+    content: ' «‎';
+}
+
+.dicom-study > header > h6 > span:after,
+.dicom-ser > header > h6 > span:after {
+    content: '»‎';
+}
+
+.dicom-study > header > button,
+.dicom-ser > header > button {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 3.5rem;
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+}
+
+.dicom-study > header > button:after,
+.dicom-ser > header > button:after {
+    content: '\00d7';
+    font-size: 2rem;
+    line-height: 1;
+}
+
+.dicom-ser > article > div {
+    overflow-x: scroll;
+    scroll-behavior: smooth;
+}
+
+.dicom-instance > button {
+    background: white !important;
+    color: gray !important;
+    font-size: 2rem;
+    line-height: 0;
+}
+
+.dicom-instance > button:after {
+    display: block;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    padding-top: 50%;
+}
+
+.dicom-instance > button:hover:after,
+.dicom-instance > button:focus:after {
+    content: '\00d7';
+    background: rgba(0, 0, 0, 0.75);
+    color: #dc3545 !important;
+    font-size: 3rem !important;
+}
+
+.dicom-instance.dummy > button:after,
+.dicom-instance.dummy > button:after {
+    content: '\1f441';
+    background: rgba(0, 0, 0, 0.75);
+    font-size: 2rem !important;
+    opacity: 0.25;
+    filter: blur(1px);
+}
+
+.dicom-instance.dummy > button:hover:after,
+.dicom-instance.dummy > button:focus:after {
+    content: '\1f441';
+    background: rgba(0, 0, 0, 0.5);
+    font-size: 2.5rem !important;
+    opacity: 0.75;
+    filter: none;
+}
+
+.dicom-instance > button > canvas {
+    filter: brightness(0.84) contrast(127%);
+}
+
+.dicom-loading {
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.dicom-loading .spinner-border {
+    width: 4rem;
+    height: 4rem;
+}

@@ -1,0 +1,1 @@
+404! @if(isset($message)){!! $message !!}@endif

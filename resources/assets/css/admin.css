@@ -1,0 +1,333 @@
+table.card-view {
+    display: block;
+    width: auto !important;
+}
+
+table.card-view thead {
+    display: none;
+}
+
+table.card-view tbody {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: flex-start;
+	align-items: stretch;
+	align-content: stretch;
+}
+
+table.card-view tbody tr{
+	display: block;
+    flex-grow: 0;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.game-item {
+	text-decoration: none;
+	color: inherit;
+}	
+
+.game-item:hover {
+	text-decoration: none;
+	color: inherit;
+}
+
+.game-item.hoverable:hover {
+    transform: scale(1.1);
+    transition: transform .1s;
+    cursor: pointer;
+}
+
+.game-item-sm {
+    max-width: 100px;
+}
+
+.game-item-md {
+    max-width: 150px;
+}
+
+.game-item-lg {
+    max-width: 200px;
+}
+
+.d-inline-block.game-item-sm {
+	min-width: 100px;
+	height: 100px;
+}
+
+.d-inline-block.game-item-md {
+	min-width: 150px;
+	height: 150px;
+}
+
+.d-inline-block.game-item-lg {
+	min-width: 200px;
+	height: 200px;
+}
+
+
+/**
+ * Flexible game-item block in diffrent sizes
+ */
+
+tr.game-item-sm {
+	width: 100%;
+	max-width: none;
+}
+
+tr.game-item-md {
+	width: 100%;
+	max-width: none;
+}
+
+tr.game-item-lg {
+	width: 100%;	
+	max-width: none;
+}
+
+
+@media (min-width: 300px) {
+	tr.game-item-sm {
+		width: 50%;
+	}
+
+	tr.game-item-md {
+		width: 100%;
+	}
+
+	tr.game-item-lg {
+		width: 100%;	
+	}
+}
+
+@media (min-width: 350px) {
+	tr.game-item-sm {
+		width: 33.3%;
+	}
+
+	tr.game-item-md {
+		width: 50%;
+	}
+
+	tr.game-item-lg {
+		width: 100%;	
+	}
+}
+
+
+@media (min-width: 500px) {
+	tr.game-item-sm {
+		width: 25%;
+	}
+
+	tr.game-item-md {
+		width: 33.3%;
+	}
+
+	tr.game-item-lg {
+		width: 50%;	
+	}
+}
+
+@media (min-width: 768px) {
+	tr.game-item-sm {
+		width: 20%;
+		max-width: none;
+	}
+
+	tr.game-item-md {
+		width: 25%;
+		max-width: none;
+	}
+
+	tr.game-item-lg {
+		width: 33.3%;	
+		max-width: none;
+	}
+}
+
+@media (min-width: 992px) {
+	tr.game-item-sm {
+		width: 16.66%;
+		max-width: none;
+	}
+
+	tr.game-item-md {
+		width: 20%;
+		max-width: none;
+	}
+
+	tr.game-item-lg {
+		width: 25%;	
+		max-width: none;
+	}
+}
+
+@media (min-width: 1200px) {
+	tr.game-item-sm {
+		width: 12.5%;
+		max-width: none;
+	}
+
+	tr.game-item-md {
+		width: 16.66%;
+		max-width: none;
+	}
+
+	tr.game-item-lg {
+		width: 20%;	
+		max-width: none;
+	}
+}
+
+@media (min-width: 1400px) {
+	tr.game-item-sm {
+		width:  10%;
+		max-width: none;
+	}
+
+	tr.game-item-md {
+		width: 12.5%;
+		max-width: none;
+	}
+
+	tr.game-item-lg {
+		width: 16.66%;	
+		max-width: none;
+	}
+}
+
+@media (min-width: 2100px) {
+	tr.game-item-sm {
+		width: 8.33%;
+		max-width: none;
+	}
+
+	tr.game-item-md {
+		width: 10%;
+		max-width: none;
+	}
+
+	tr.game-item-lg {
+		width: 12.5%;	
+		max-width: none;
+	}
+}
+
+
+.game-item-icon {
+	background: #fff;
+	background-image: url('/images/questnik-icon.svg');
+	background-position: center center;
+	background-repeat: no-repeat;
+	background-size: 70% 70%;
+	position: relative;
+}
+
+.game-item-sm .game-item-icon{
+	width: 70px;
+	height: 70px;
+	border-radius: 8px;
+}
+
+.game-item-md .game-item-icon{
+	width: 100px;
+	height: 100px;
+	border-radius: 15px;
+}
+
+.game-item-lg .game-item-icon{
+	width: 150px;
+	height: 150px;
+	border-radius: 20px;
+}
+
+
+.game-item-name {
+	font-weight: 300;
+	overflow-x: hidden;
+	display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.game-item-name-nowrap {
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.game-item-sm .game-item-name{
+	font-size: 0.7rem;
+}
+
+.game-item-md .game-item-name{
+	font-size: 0.9rem;
+}
+
+.game-item-lg .game-item-name{
+	font-size: 1.2rem;
+}
+
+.game-item-remove {
+	display: none;
+}
+
+.game-item.removable .game-item-remove {
+	display: block;
+	position: absolute;
+	width: 25px;
+	height: 25px;
+	border-radius: 50%;
+	background: red;
+	color: #fff;
+	text-align: center;
+	font-size: 1rem;
+	top: -10px;
+	right: -10px;
+	line-height: 155%;
+}
+
+.game-item-remove:hover {
+    transform: scale(1.1);
+    transition: transform .1s;
+    cursor: pointer;
+}
+
+
+
+
+.shaking {
+	display: inherit;
+	transform-origin: center center;
+	animation-play-state: running;
+	animation-name: shake;
+	animation-duration: 600ms;
+	animation-timing-function: ease-in-out;
+	animation-iteration-count: infinite;
+}
+
+
+@keyframes shake {
+  2% { transform: translate(1px, 1px) rotate(0.2deg); }
+  10% { transform: translate(1px, 2px) rotate(0.5deg); }
+  18% { transform: translate(0px, 1px) rotate(0.3deg); }
+  26% { transform: translate(0px, 2px) rotate(0.5deg); }
+  34% { transform: translate(1px, 0px) rotate(0.4deg); }
+  42% { transform: translate(0px, 2px) rotate(0.5deg); }
+  50% { transform: translate(1px, 1px) rotate(0.1deg); }
+  58% { transform: translate(2px, 1px) rotate(0.5deg); }
+  66% { transform: translate(0px, 0px) rotate(0.0deg); }
+  74% { transform: translate(0px, 1px) rotate(0.5deg); }
+  82% { transform: translate(1px, 1px) rotate(0.5deg); }
+  90% { transform: translate(2px, 0px) rotate(0.1deg); }
+  98% { transform: translate(1px, 2px) rotate(0.2deg); }
+  0%, 100% { transform: translate(0, 0) rotate(0); } }
+
+
+
+
+
+

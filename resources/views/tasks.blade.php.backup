@@ -1,0 +1,860 @@
+@extends('layouts.master')
+
+@section('title')
+	Задачи и выплаты
+@stop
+
+@section('styles')
+@stop
+
+@section('scripts')
+	<script type="text/javascript" src="/js/jquery.dataTables.min.js"></script>
+@stop
+
+@section('content')
+<div class="page-wrapper">
+	<div class="container-xl">
+		<!-- Page title -->
+		<div class="page-header d-print-none mt-4">
+			<div class="row align-items-center">
+				<div class="col">
+					<!-- Page pre-title -->
+					<div id="project_name" class="page-pretitle"></div>
+					<h2 class="page-title">
+						Задачи
+					</h2>
+				</div>
+				<!-- Page title actions -->
+				<div class="col-auto ms-auto d-print-none">
+					<div class="btn-list">
+						<span class="d-none d-sm-inline">
+							<button id="add_task_btn" class="btn btn-white">
+								<b class="fa fa-plus-circle text-success me-2"></b>Добавить ведомость
+							</button>
+						</span>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div id="loading_orders" class="card" hidden>
+			<div class="card-body text-center">
+				<h1><b class="fad fa-spinner fa-pulse"></b> Загрузка ведомостей</h1>
+			</div>
+		</div>
+		<div id="no_orders" class="card" hidden>
+			<div class="card-body text-center">
+				<h1><b class="fad fa-info-square"></b> Пока нет ни одной ведомости</h1>
+			</div>
+		</div>
+
+		<div id="orders_wrapper" hidden></div>
+	</div>
+</div>
+
+<script type="text/javascript">
+	$(function(){
+		window.InterfaceManager = new InterfaceManagerClass;
+		window.InterfaceManager.menuShow('project_menu');
+		window.InterfaceManager.menuActive('tasks');
+		window.InterfaceManager.checkAuth();
+		window.InterfaceManager.loadMe();
+		window.InterfaceManager.notificationsCount();
+		//window.InterfaceManager.signUnrequestedCount();
+
+		let TasksManager = new TasksManagerClass;
+
+		var ProjectManager = new ProjectManagerClass;
+			ProjectManager.project_id = $('#project_id').val();
+			ProjectManager.loadProjectData();
+	});
+
+
+
+	class TasksManagerClass {
+
+		constructor(game_id){
+			let ths = this;
+			ths.tasks_datatables = {};
+			ths.payouts_datatables = {};
+			ths.import_payouts_data = {};
+			ths.loadOrders();
+			ths.bindAddTasksModalActions();
+		}
+
+
+
+		/**
+		 * Загрузка заказов (ведомостей)
+		 */
+		loadOrders(){
+			let ths = this;
+
+			$("#orders_wrapper").html("");
+			$('#loading_orders').prop('hidden', false);
+			$('#orders_wrapper').prop('hidden', true);
+			$('#no_orders').prop('hidden', true);
+
+
+			var ax = axios.get('{{ config('app.api') }}/api/project/{{$project_id}}/orders');
+			ax.then(function (response) {
+				if (response.data.orders) {
+
+					if(response.data.orders.length == 0) {
+						$('#no_orders').prop('hidden', false);
+					}
+
+					$.each(response.data.orders, function(i, order){
+						ths.renderOrder(order);
+					});
+					$('#orders_wrapper').prop('hidden', false);
+				}
+			})
+			.catch(function (error) {
+				console.log(error);
+				bootbox.dialog({
+					title: error.response.data.title ?? 'Ошибка',
+					message: error.response.data.message ?? error.response.statusText,
+					closeButton: false,
+					buttons:{
+						cancel:{
+							label: 'Закрыть',
+							className: 'btn-dark'
+						}
+					}
+				});
+			})
+			.finally(function(){
+				$('#loading_orders').prop('hidden', true);
+			});
+		}
+
+
+		/**
+		 * Рендеринг ведомости
+		 */
+		renderOrder(order){
+			let ths = this;
+
+			var block = '<div id="order_' + order.id + '" class="card mb-2">';
+				block+= '	<div class="card-body d-flex justify-content-between">';
+				block+= '		<h2>Ведомость от ' + order.created_date + ' <small class="text-muted">' + order.created_time + '</small></h2>';
+				block+= '		<button class="btn btn-white btn-pill btn-show-order"><b class="fa fa-angle-down"></b></button>';
+				block+= '		<button class="btn btn-white btn-pill btn-hide-order" hidden><b class="fa fa-angle-up"></b></button>';
+				block+= '	</div>';
+				block+= '	<div class="tabs-wrapper card-body" hidden>';
+				block+= '		<div class="d-flex justify-content-start">';
+				block+= '			<button class="btn btn-show-tasks btn-white btn-pill me-2">Задачи</button>';
+				block+= '			<button class="btn btn-show-payouts btn-white btn-pill me-2">Выплаты</button>';
+				block+= '			<button class="btn btn-load-payouts btn-white btn-pill me-2">Загрузить реестр выплаты</button>';
+				block+= '		</div>';
+				block+= '	</div>';
+				block+= '	<div class="order-wrapper" hidden>';
+				block+= '		<div class="tasks-table-wrapper card-body p-0" hidden>';
+				block+= '			<table class="table tasks-table table-striped" width="100%"></table>';
+				block+= '		</div>';
+				block+= '		<div class="payouts-table-wrapper card-body p-0" hidden>';
+				block+= '			<table class="table payouts-table table-striped" width="100%"></table>';
+				block+= '		</div>';
+				block+= '		<div class="load-payouts-wrapper card-body " hidden>';
+				block+= '			<input type="file" class="upload_payout_file" hidden>';
+				block+= '			<div class="text-center">';
+				block+= '				<button class="btn btn-lg btn-pill btn-green btn-upload-payout-file m-4 mx-auto">';
+				block+= '					<div class="text"><b class="fad fa-file-excel me-2"></b>Загрузить файл Excel</div>';
+				block+= '					<div class="wait" hidden><b class="fad fa-spinner fa-pulse me-2"></b>Файл загружается</div>';
+				block+= '				</button>';
+				block+= '			</div>';
+				block+= '			<table class="table my-1 payouts_table_preview" style="width: 100%;" hidden>';
+				block+= '				<thead>';
+				block+= '					<tr>';
+				block+= '						<th>Категория работ</th>';
+				block+= '						<th>ИНН</th>';
+				block+= '						<th>ФИО</th>';
+				block+= '						<th>Сумма</th>';
+				block+= '						<th>Ошибка</th>';
+				block+= '					</tr>';
+				block+= '				</thead>';
+				block+= '				<tbody></tbody>';
+				block+= '			</table>';
+				block+= '			<div class="text-end mt-3">';
+				block+= '				<button class="btn btn-primary btn-import-payouts" hidden>';
+				block+= '					<div class="text">Загрузить и начать выплаты</div>';
+				block+= '					<div class="wait" hidden><b class="fad fa-spinner fa-pulse me-2"></b>Импорт...</div>';
+				block+= '				</button>';
+				block+= '			</div>';
+				block+= '		</div>';
+				block+= '	</div>';
+				block+= '</div>';
+
+			var b = $(block);
+
+			$(b).find('.btn-show-order').bind('click', function(){
+				ths.showOrder(order.id);
+			});
+
+			$(b).find('.btn-hide-order').bind('click', function(){
+				ths.hideOrder(order.id);
+			});
+
+			$(b).find('.btn-show-tasks').bind('click', function(){
+				ths.hidePayoutsTable(order.id);
+				ths.hideLoadPayouts(order.id);
+				ths.showTasksTable(order.id);
+			});
+
+			$(b).find('.btn-show-payouts').bind('click', function(){
+				ths.hideTasksTable(order.id);
+				ths.hideLoadPayouts(order.id);
+				ths.showPayoutsTable(order.id);
+			});
+
+			$(b).find('.btn-load-payouts').bind('click', function(){
+				ths.hideTasksTable(order.id);
+				ths.hidePayoutsTable(order.id);
+				ths.showLoadPayouts(order.id);
+
+			});
+
+			$(b).find('.btn-upload-payout-file').bind('click', function(){
+				$(b).find('.upload_payout_file').trigger('click');
+			});
+
+			$(b).find('.upload_payout_file').bind('change', function(e){
+				ths.uploadPayoutsFile(order.id, e.target.files[0]);
+			});
+
+			$(b).find('.btn-import-payouts').bind('click', function(e){
+				ths.importPayoutsFile(order.id);
+			});
+
+			$('#orders_wrapper').append(b);
+		}
+
+
+
+		/**
+		 * Развернуть ведомость
+		 */
+		showOrder(order_id){
+			let ths = this;
+			$('#order_' + order_id).find('.btn-show-order').prop('hidden', true);
+			$('#order_' + order_id).find('.btn-hide-order').prop('hidden', false);
+			$('#order_' + order_id).find('.tabs-wrapper').prop('hidden', false);
+			$('#order_' + order_id).find('.order-wrapper').prop('hidden', false);
+			ths.showTasksTable(order_id);
+		}
+
+
+		/**
+		 * Свернуть ведомость
+		 */
+		hideOrder(order_id){
+			let ths = this;
+			$('#order_' + order_id).find('.btn-show-order').prop('hidden', false);
+			$('#order_' + order_id).find('.btn-hide-order').prop('hidden', true);
+			$('#order_' + order_id).find('.tabs-wrapper').prop('hidden', true);
+			$('#order_' + order_id).find('.order-wrapper').prop('hidden', true);
+			ths.hideTasksTable(order_id);
+			ths.hidePayoutsTable(order_id);
+			ths.hideLoadPayouts(order_id);
+		}
+
+
+		/**
+		 * Показать таблицу
+		 */
+		showTasksTable(order_id){
+			let ths = this;
+			ths.hideTasksTable(order_id);
+			$('#order_' + order_id).find('.tabs-wrapper button.btn').addClass('btn-white').removeClass('btn-dark');
+			$('#order_' + order_id).find('button.btn-show-tasks').addClass('btn-dark').removeClass('btn-white');
+			$('#order_' + order_id).find('.tasks-table-wrapper').prop('hidden', false);
+			ths.initTasksDatatable(order_id);
+		}
+
+
+		/**
+		 *
+		 */
+		hideTasksTable(order_id){
+			let ths = this;
+			$('#order_' + order_id).find('.tasks-table-wrapper').prop('hidden', true);
+			ths.destroyTasksDatatable(order_id);
+		}
+
+
+		/**
+		 *
+		 */
+		showPayoutsTable(order_id){
+			let ths = this;
+			ths.hidePayoutsTable(order_id);
+			$('#order_' + order_id).find('.tabs-wrapper button.btn').addClass('btn-white').removeClass('btn-dark');
+			$('#order_' + order_id).find('button.btn-show-payouts').addClass('btn-dark').removeClass('btn-white');
+			$('#order_' + order_id).find('.payouts-table-wrapper').prop('hidden', false);
+			ths.initPayoutsDatatable(order_id);
+		}
+
+
+		/**
+		 *
+		 */
+		hidePayoutsTable(order_id){
+			let ths = this;
+			$('#order_' + order_id).find('.payouts-table-wrapper').prop('hidden', true);
+			ths.destroyPayoutsDatatable(order_id);
+		}
+
+
+		/**
+		 *
+		 */
+		showLoadPayouts(order_id){
+			let ths = this;
+			$('#order_' + order_id).find('.tabs-wrapper button.btn').addClass('btn-white').removeClass('btn-dark');
+			$('#order_' + order_id).find('button.btn-load-payouts').addClass('btn-dark').removeClass('btn-white');
+			$('#order_' + order_id).find('.load-payouts-wrapper').prop('hidden', false);
+		}
+
+
+		/**
+		 *
+		 */
+		hideLoadPayouts(order_id){
+			let ths = this;
+			$('#order_' + order_id).find('.load-payouts-wrapper').prop('hidden', true);
+		}
+
+
+
+		/**
+		 * Initialization of datatable
+		 */
+		initTasksDatatable(order_id){
+			let ths = this;
+			let csrf_token = $('meta[name="csrf-token"]').attr('content');
+
+			$.fn.dataTable.ext.classes.sPageButton = "btn btn-outline-primary ";
+			$.fn.dataTable.ext.classes.sPageButtonActive = "bg-primary text-light ";
+			$.fn.dataTable.ext.classes.sProcessing = "text-center mb-3 mx-auto py-3 bg-dark text-light fixed-bottom col-4 rounded";
+			$.fn.dataTable.ext.classes.sInfo = "text-center my-2 mx-auto p-2";
+			$.fn.dataTable.ext.classes.sRowEmpty = "d-none";
+			$.fn.dataTable.ext.classes.sWrapper = "";
+
+			var settings = {
+				ajax : {
+					url: '{{ config('app.api') }}/api/order/' + order_id + '/tasks/datatable',
+					dataSrc: 'data',
+					type: 'GET',
+					xhrFields: {
+        			    withCredentials: true
+        			}
+				},
+				processing: false,
+				pageLength: 50,
+				dom : '<"p-0 overflow-auto"rt>',
+				sPageButton: "btn btn-dark",
+				pagingType: "numbers",
+				serverSide: true,
+				stateSave: false,
+				responsive: false,
+				deferRender: true,
+				oLanguage: {
+					sInfo: "<b>_START_</b> &rarr; <b>_END_</b>, из <b>_TOTAL_</b>",
+					sInfoEmpty: "Нет записей для отображения",
+					sInfoFiltered: "(отфильтровано из _MAX_)",
+					sLoadingRecords: "Загрузка...",
+					sProcessing: "<i class='fad fa-spinner fa-pulse'></i> Загрузка...",
+					sEmptyTable: "Нет данных в таблице",
+				},
+				columns: [
+					{name: 'user_name', data: 'user_name', title: 'ФИО', class:'', sortable: true, searchable: true, visible: true},
+					{name: 'user_inn', data: 'user_inn', title: 'ИНН', class:'', sortable: true, searchable: true, visible: true},
+					{name: 'job_category_name', data: 'job_category_name', title: 'Категория работ', class:'', sortable: true, searchable: true, visible: true},
+					{name: 'sum', data: 'sum', title: 'Сумма', class:'', sortable: true, searchable: true, visible: true},
+					{name: 'status', data: 'status', title: 'Статус', class:'', sortable: true, searchable: true, visible: true,
+					render: function (data, type, row, meta ) {
+						if (row.status == 'ready') {
+							return '<small class="text-success">В работе</small>';
+						}
+						return '<small class="text-warning">Подтверждение СМЗ</small>';
+					}},
+
+
+					{name: 'user_taxpayer_registred_as_npd', data: 'user_taxpayer_registred_as_npd', title: 'Статус СМЗ', class:'', sortable: true, searchable: true, visible: true,
+					render: function (data, type, row, meta ) {
+						if (row.user_taxpayer_registred_as_npd == 1) {
+							return '<b class="fad fa-check-circle text-success" titile="Пользователь зарегистрирован как плательщик НПД"></b>'
+						} else {
+							return '<b class="fad fa-question-circle text-muted" titile="Информации о статусе нет"></b>'
+						}
+					}},
+
+					{name: 'id', data: 'id', title: 'ID', class:'', sortable: true, searchable: true, visible: true}
+				],
+				rowCallback: function(row, data, index){
+					$(row).find('button.btn-more').bind('click', function(){
+						$(row).toggleClass('extend');
+					});
+				},
+				drawCallback: function(settings){
+					$('.dataTables_paginate').find('span').addClass('btn-group');
+				}
+			}
+			ths.tasks_datatables[order_id] = $('#order_' + order_id).find('.tasks-table').DataTable(settings);
+		}
+
+
+		destroyTasksDatatable(order_id){
+			let ths = this;
+			try {
+				ths.tasks_datatables[order_id].destroy(false);
+				delete(ths.tasks_datatables[order_id]);
+			} catch(e) {
+				console.log(e);
+			}
+		}
+
+
+		/**
+		 * Initialization of datatable
+		 */
+		initPayoutsDatatable(order_id){
+			let ths = this;
+			let csrf_token = $('meta[name="csrf-token"]').attr('content');
+
+			$.fn.dataTable.ext.classes.sPageButton = "btn btn-outline-primary ";
+			$.fn.dataTable.ext.classes.sPageButtonActive = "bg-primary text-light ";
+			$.fn.dataTable.ext.classes.sProcessing = "text-center mb-3 mx-auto py-3 bg-dark text-light fixed-bottom col-4 rounded";
+			$.fn.dataTable.ext.classes.sInfo = "text-center my-2 mx-auto p-2";
+			$.fn.dataTable.ext.classes.sRowEmpty = "d-none";
+			$.fn.dataTable.ext.classes.sWrapper = "";
+
+			var settings = {
+				ajax : {
+					url: '{{ config('app.api') }}/api/order/' + order_id + '/payouts/datatable',
+					dataSrc: 'data',
+					type: 'GET',
+					xhrFields: {
+        			    withCredentials: true
+        			}
+				},
+				processing: false,
+				pageLength: 50,
+				dom : '<"p-0 overflow-auto"rt>',
+				sPageButton: "btn btn-dark",
+				pagingType: "numbers",
+				serverSide: true,
+				stateSave: false,
+				responsive: false,
+				deferRender: true,
+				oLanguage: {
+					sInfo: "<b>_START_</b> &rarr; <b>_END_</b>, из <b>_TOTAL_</b>",
+					sInfoEmpty: "Нет записей для отображения",
+					sInfoFiltered: "(отфильтровано из _MAX_)",
+					sLoadingRecords: "Загрузка...",
+					sProcessing: "<i class='fad fa-spinner fa-pulse'></i> Загрузка...",
+					sEmptyTable: "Нет данных в таблице",
+				},
+				columns: [
+					{name: 'id', data: 'id', title: 'ID', class:'', sortable: true, searchable: true, visible: true},
+					{name: 'user_name', data: 'user_name', title: 'ФИО', class:'', sortable: true, searchable: true, visible: true},
+					{name: 'user_inn', data: 'user_inn', title: 'ИНН', class:'', sortable: true, searchable: true, visible: true},
+					{name: 'job_category_name', data: 'job_category_name', title: 'Категория работ', class:'', sortable: true, searchable: true, visible: true},
+					{name: 'sum', data: 'sum', title: 'Сумма', class:'', sortable: true, searchable: true, visible: true},
+					{name: 'status', data: 'status', title: 'Статус', class:'', sortable: true, searchable: true, visible: true,
+					render: function (data, type, row, meta ) {
+						let statuses = {
+							'draft' : '<small class="text-dark">Черновик</small>',
+							'process' : '<small class="text-info">В процессе</small>',
+							'complete' : '<small class="text-success">Успешно</small>',
+							'error' : '<small class="text-danger">Ошибка</small>',
+							'canceled' : '<small class="text-danger">Аннулирован</small>',
+						}
+						return statuses[row.status];
+					}},
+
+
+					{name: 'user_taxpayer_registred_as_npd', data: 'user_taxpayer_registred_as_npd', title: 'Статус СМЗ', class:'', sortable: true, searchable: true, visible: true,
+					render: function (data, type, row, meta ) {
+						if (row.user_taxpayer_registred_as_npd == 1) {
+							return '<b class="fad fa-check-circle text-success" titile="Пользователь зарегистрирован как плательщик НПД"></b>'
+						} else {
+							return '<b class="fad fa-question-circle text-muted" titile="Информации о статусе нет"></b>'
+						}
+					}},
+
+
+					{name: 'created_datetime', data: 'created_datetime', title: 'Дата', class:'', sortable: true, searchable: true, visible: true,
+					render: function (data, type, row, meta ) {
+						return '<small>' + row.created_datetime + '</small>';
+					}},
+					{name: 'description', data: 'description', title: '<b class="fad fa-info-circle"></b>', class:'', sortable: true, searchable: true, visible: true,
+					render: function (data, type, row, meta ) {
+						var b = '<div class="payout_description p-1 rounded border" hidden>';
+							if (row.description != null) {
+							b+= '<small>'+ row.description + '</small>';
+							}
+							if (row.receipt_url != null) {
+								b+='<small><a href="' + row.receipt_url + '" target="_blank">ссылка на чек</a></small>'
+							}
+							b+= '</div>';
+							b+= '<button class="btn btn-sn btn-pill btn-show-description"><b class="fad fa-info-circle"></b></button>';
+						return b;
+					}},
+
+				],
+				rowCallback: function(row, data, index){
+					$(row).find('button.btn-show-description').bind('click', function(){
+						$(this).prop('hidden', true)
+						$(row).find('.payout_description').prop('hidden', false);
+					});
+				},
+				drawCallback: function(settings){
+					$('.dataTables_paginate').find('span').addClass('btn-group');
+				}
+			}
+			ths.payouts_datatables[order_id] = $('#order_' + order_id).find('.payouts-table').DataTable(settings);
+		}
+
+
+		destroyPayoutsDatatable(order_id){
+			let ths = this;
+			try {
+				ths.payouts_datatables[order_id].destroy(false);
+				delete(ths.payouts_datatables[order_id]);
+			} catch(e) {
+				console.log(e);
+			}
+		}
+
+
+		uploadPayoutsFile(order_id, file){
+			let ths = this;
+				ths.import_payouts_data[order_id] = {};
+
+			$('#order_' + order_id).find(".btn-upload-payout-file").prop('disabled', true);
+			$('#order_' + order_id).find(".btn-upload-payout-file .text").prop('hidden', true);
+			$('#order_' + order_id).find(".btn-upload-payout-file .wait").prop('hidden', false);
+
+			var formData = new FormData();
+				formData.append('file', file);
+
+			var ax = axios.post('{{ config('app.api') }}/api/order/' + order_id + '/payout/simulate', formData);
+			ax.then(function (response) {
+				if (response.data.table){
+					var tbody = $('#order_' + order_id).find('.payouts_table_preview tbody');
+					$(tbody).html("");
+
+					$('#order_' + order_id).find('.payouts_table_preview').prop('hidden', false);
+					$('#order_' + order_id).find('.btn-import-payouts').prop('hidden', false);
+
+					$.each(response.data.table, function(i, row) {
+						var tr = '<tr>';
+							tr+= '<td>' + row.job_category_name + '</td>';
+							tr+= '<td>' + row.inn + '</td>';
+							tr+= '<td>' + row.contractor + '</td>';
+							tr+= '<td>' + row.sum + '</td>';
+							tr+= '<td>';
+							$.each(row.errors, function(n, error){
+								tr+='<div class="text-danger">';
+								tr+=	 error
+								tr+='</div>';
+							});
+							tr+= '</td>';
+							tr+= '</tr>';
+
+						ths.import_payouts_data[order_id][i] = row;
+						$(tbody).append(tr);
+					});
+				}
+			})
+			.catch(function (error) {
+				console.log(error);
+				bootbox.dialog({
+					title: error.response.data.title ?? 'Ошибка',
+					message: error.response.data.message ?? error.response.statusText,
+					closeButton: false,
+					buttons:{
+						cancel:{
+							label: 'Закрыть',
+							className: 'btn-dark'
+						}
+					}
+				});
+			})
+			.finally(function(){
+
+				$('#order_' + order_id).find(".btn-upload-payout-file").prop('disabled', false);
+				$('#order_' + order_id).find(".btn-upload-payout-file .text").prop('hidden', false);
+				$('#order_' + order_id).find(".btn-upload-payout-file .wait").prop('hidden', true);
+				$('#order_' + order_id).find(".upload_payout_file").val("");
+			});
+		}
+
+
+
+		importPayoutsFile(order_id){
+			let ths = this;
+
+			$('#order_' + order_id).find(".btn-import-payouts").prop('disabled', true);
+			$('#order_' + order_id).find(".btn-import-payouts .text").prop('hidden', true);
+			$('#order_' + order_id).find(".btn-import-payouts .wait").prop('hidden', false);
+
+
+			let data = {};
+				data.import_data = ths.import_payouts_data[order_id];
+
+			var ax = axios.post('{{ config('app.api') }}/api/order/' + order_id + '/payout', data);
+			ax.then(function (response) {
+				if (response.data){
+
+					ths.showPayoutsTable(order_id);
+
+					boottoast.success({
+						message: response.data.message ?? error.response.statusText,
+						title: response.data.title ?? 'Успешно',
+						imageSrc: "/images/logo-sm.svg"
+					});
+
+					$('#order_' + order_id).find('.payouts_table_preview').prop('hidden', true);
+					$('#order_' + order_id).find('.btn-import-payouts').prop('hidden', true);
+				}
+
+			})
+			.catch(function (error) {
+				console.log(error);
+				bootbox.dialog({
+					title: error.response.data.title ?? 'Ошибка',
+					message: error.response.data.message ?? error.response.statusText,
+					closeButton: false,
+					buttons:{
+						cancel:{
+							label: 'Закрыть',
+							className: 'btn-dark'
+						}
+					}
+				});
+			})
+			.finally(function(){
+
+				$('#order_' + order_id).find(".btn-import-payouts").prop('disabled', false);
+				$('#order_' + order_id).find(".btn-import-payouts .text").prop('hidden', false);
+				$('#order_' + order_id).find(".btn-import-payouts .wait").prop('hidden', true);
+
+			});
+
+		}
+
+
+
+
+
+
+		bindAddTasksModalActions(){
+			let ths = this;
+			$('#add_task_btn').bind('click', function(){
+				$('#add_tasks_modal').modal('show');
+
+				$('#load_tasks_file_input').val("");
+			});
+
+			$('#load_tasks_file_input').bind('change', function(e){
+				ths.uploadTasksFile(e.target.files[0])
+			});
+
+			$('#load_tasks_file_btn').bind('click', function(){
+				$('#load_tasks_file_input').trigger('click');
+			});
+
+			$('#add_tasks_back').bind('click', function(){
+				$('#load_tasks_table_wrapper').prop('hidden', false);
+				$('#preview_tasks_table_wrapper').prop('hidden', true);
+				$('#tasks_table_preview tbody').html('');
+				$('#add_tasks_modal .modal-footer').prop('hidden', true);
+			});
+
+			$('#tasks_import_btn').bind('click', function(){
+				ths.importTasksFile();
+			});
+
+		}
+
+
+
+		uploadTasksFile(file){
+			let ths = this;
+				ths.import_tasks_data = {};
+
+			$("#load_tasks_file_btn").prop('disabled', true);
+			$("#load_tasks_file_btn .text").prop('hidden', true);
+			$("#load_tasks_file_btn .wait").prop('hidden', false);
+
+			var formData = new FormData();
+				formData.append('file', file);
+
+			var ax = axios.post('{{ config('app.api') }}/api/project/{{$project_id}}/order/simulate', formData);
+			ax.then(function (response) {
+				if (response.data.table){
+
+					$('#load_tasks_table_wrapper').prop('hidden', true);
+					$('#preview_tasks_table_wrapper').prop('hidden', false);
+					$('#tasks_table_preview tbody').html('', false);
+					$('#add_tasks_modal .modal-footer').prop('hidden', false);
+
+					$.each(response.data.table, function(i, row){
+						var tr = '<tr>';
+							tr+= '<td>' + row.job_category_name + '</td>';
+							tr+= '<td>' + row.inn + '</td>';
+							tr+= '<td>' + row.contractor + '</td>';
+							tr+= '<td>' + row.job_start_date + '</td>';
+							tr+= '<td>' + row.job_finish_date + '</td>';
+							tr+= '<td>' + row.sum + '</td>';
+							tr+= '<td>';
+							$.each(row.errors, function(n, error){
+								tr+='<div class="text-danger">';
+								tr+=	 error
+								tr+='</div>';
+							});
+							tr+= '</td>';
+							tr+= '</tr>';
+
+						ths.import_tasks_data[i] = row;
+						$('#tasks_table_preview tbody').append(tr);
+					});
+
+				}
+			})
+			.catch(function (error) {
+				console.log(error);
+				bootbox.dialog({
+					title: error.response.data.title ?? 'Ошибка',
+					message: error.response.data.message ?? error.response.statusText,
+					closeButton: false,
+					buttons:{
+						cancel:{
+							label: 'Закрыть',
+							className: 'btn-dark'
+						}
+					}
+				});
+			})
+			.finally(function(){
+				$("#load_tasks_file_btn").prop('disabled', false);
+				$("#load_tasks_file_btn .text").prop('hidden', false);
+				$("#load_tasks_file_btn .wait").prop('hidden', true);
+				$("#load_tasks_file_input").val("");
+			});
+
+		}
+
+
+
+		importTasksFile(){
+			let ths = this;
+
+			$("#tasks_import_btn").prop('disabled', true);
+			$("#tasks_import_btn .text").prop('hidden', true);
+			$("#tasks_import_btn .wait").prop('hidden', false);
+
+			let data = {};
+				data.import_data = ths.import_tasks_data;
+			var ax = axios.post('{{ config('app.api') }}/api/project/{{$project_id}}/order', data);
+			ax.then(function (response) {
+				if (response.data){
+					$('#add_tasks_modal').modal('hide');
+					boottoast.success({
+						message: response.data.message ?? error.response.statusText,
+						title: response.data.title ?? 'Успешно',
+						imageSrc: "/images/logo-sm.svg"
+					});
+				}
+				ths.loadOrders();
+
+				$('#load_tasks_table_wrapper').prop('hidden', false);
+				$('#preview_tasks_table_wrapper').prop('hidden', true);
+				$('#tasks_table_preview tbody').html('');
+				$('#add_tasks_modal .modal-footer').prop('hidden', true);
+
+			})
+			.catch(function (error) {
+				console.log(error);
+				bootbox.dialog({
+					title: error.response.data.title ?? 'Ошибка',
+					message: error.response.data.message ?? error.response.statusText,
+					closeButton: false,
+					buttons:{
+						cancel:{
+							label: 'Закрыть',
+							className: 'btn-dark'
+						}
+					}
+				});
+			})
+			.finally(function(){
+				$("#tasks_import_btn").prop('disabled', false);
+				$("#tasks_import_btn .text").prop('hidden', false);
+				$("#tasks_import_btn .wait").prop('hidden', true);
+			});
+
+		}
+
+	}
+</script>
+
+
+
+
+<div id="add_tasks_modal" class="modal" tabindex="-1">
+	<div class="modal-dialog modal-xl">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Добавление ведомости</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div id="load_tasks_table_wrapper" class="modal-body text-center">
+				<div class="alert alert-info">
+					Загрузите файл с ведомостью подготовленный в Excel или другом табличном редакторе. Файл необходимо сохранить в формате xls/xlsx. Колонки файла должны соответствовать <a href="/files/tasks_template.xlsx">шаблону</a>
+				</div>
+				<input type="file" id="load_tasks_file_input" hidden>
+				<button id="load_tasks_file_btn" class="btn btn-lg btn-success btn-pill">
+					<div class="text"><b class="fad fa-file-excel me-2"></b>Загрузить файл Excel</div>
+					<div class="wait" hidden><b class="fad fa-spinner fa-pulse me-2"></b>Загрузка</div>
+				</button>
+			</div>
+
+			<div id="preview_tasks_table_wrapper" class="modal-body p-0" hidden>
+				<div class="alert alert-info  m-4">
+					Проверьте данные, которые мы получили из вашего файла
+				</div>
+
+				<table id="tasks_table_preview" class="table mb-3" style="width: 100%;">
+					<thead>
+						<tr>
+							<th>Категория работ</th>
+							<th>ИНН</th>
+							<th>ФИО</th>
+							<th>Дата начала работ</th>
+							<th>Дата завершения работ</th>
+							<th>Сумма</th>
+							<th>Ошибка</th>
+						</tr>
+					</thead>
+					<tbody></tbody>
+				</table>
+			</div>
+
+			<div class="modal-footer text-end" hidden>
+				<button id="add_tasks_back" class="btn btn-white">Назад</button>
+				<button id="tasks_import_btn" class="btn btn-primary">
+					<div class="text">Добавить</div>
+					<div class="wait" hidden><b class="fad fa-spinner fa-pulse"></b>Импорт данных...</div>
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
+@stop

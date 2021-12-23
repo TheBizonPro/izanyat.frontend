@@ -1,0 +1,20 @@
+version: '3'
+services:
+  web:
+    image: nginx:1.14.1
+    domainname: web
+    ports:
+      - ${NGINX_PORT}:80
+    volumes:
+      - ./:/var/www/html:ro
+      - ./default.conf:/etc/nginx/conf.d/default.conf
+    links:
+      - php-fpm
+  php-fpm:
+    domainname: php-fpm
+    volumes:
+      - ./:/var/www/html
+      - ./php.ini:/usr/local/etc/php/php.ini
+    build:
+      context: ./
+      dockerfile: Dockerfile
